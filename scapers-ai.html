@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ham.eay</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+        width: 50%;
+        background-color: #fff;
+        border-radius: 20px; /* Border radius ditambahkan */
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+          rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+          rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+        overflow: hidden;
+      }
+
+      .chat-header {
+        background-color: white;
+        color: black;
+        font-weight: bold;
+        font-size: 1.2rem;
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .chat-box {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .chat-message {
+        max-width: 60%;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        line-height: 1.5;
+        position: relative;
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+      }
+
+      .ai-message {
+        align-self: flex-start;
+        background-color: #eaeaea;
+        color: black;
+      }
+
+      .chat-input {
+        display: flex;
+        padding: 10px;
+        background-color: white;
+        border-top: 1px solid #ddd;
+      }
+
+      .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+        font-size: 14px;
+      }
+
+      .chat-input button {
+        margin-left: 10px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .chat-input button:hover {
+        background-color: #0056b3;
+      }
+
+      @media screen and (max-width: 480px) {
+        .chat-container {
+          width: 100%; /* Lebar penuh untuk layar kecil */
+          height: 90vh; /* Tinggi sedikit lebih besar */
+          border-radius: 0; /* Menghilangkan radius untuk layar kecil */
+        }
+
+        .chat-header {
+          font-size: 1rem; /* Ukuran header lebih kecil */
+        }
+
+        .chat-message {
+          font-size: 13px; /* Ukuran font pesan lebih kecil */
+        }
+
+        .chat-input input {
+          font-size: 12px; /* Input lebih kecil */
+        }
+
+        .chat-input button {
+          font-size: 12px; /* Tombol lebih kecil */
+          padding: 8px 15px; /* Padding tombol dikurangi */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h2>Ham.Eay</h2>
+      </div>
+      <div id="chat-box" class="chat-box"></div>
+      <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Ketik pesan..." />
+        <button id="send-btn">Kirim</button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const chatBox = document.getElementById("chat-box");
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-btn");
+
+      // Function to add a message to the chat box
+      function addMessage(content, sender) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("chat-message");
+        messageElement.classList.add(
+          sender === "user" ? "user-message" : "ai-message"
+        );
+        messageElement.textContent = content;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      // Function to handle sending messages
+      async function sendMessage() {
+        const userMessage = messageInput.value.trim();
+        if (!userMessage) return;
+
+        // Add user's message to the chat
+        addMessage(userMessage, "user");
+        messageInput.value = "";
+
+        try {
+          const response = await axios.post(
+            "https://api.deepenglish.com/api/gpt_open_ai/chatnew",
+
+            {
+              messages: [
+                { role: "user", content: userMessage },
+                {
+                  role: "system",
+                  content:
+                    "Gunakan bahasa Indonesia yang baik dan benar, Jangan Kaku",
+                },
+              ],
+              temperature: 1,
+              projectName: "wordpress",
+            },
+            {
+              headers: {
+                Authorization:
+                  "Bearer UFkOfJaclj61OxoD7MnQknU1S2XwNdXMuSZA+EZGLkc=",
+              },
+            }
+          );
+
+          const aiMessage = response.data.message || "AI tidak merespons.";
+          addMessage(aiMessage, "ai");
+        } catch (error) {
+          console.error("Error:", error);
+          addMessage("Terjadi kesalahan saat menghubungi AI.", "ai");
+        }
+      }
+
+      // Event listener for the send button
+      sendButton.addEventListener("click", sendMessage);
+
+      // Event listener for Enter key press
+      messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
